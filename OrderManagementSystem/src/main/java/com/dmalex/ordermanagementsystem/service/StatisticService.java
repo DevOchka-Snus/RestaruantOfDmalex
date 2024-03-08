@@ -1,10 +1,14 @@
 package com.dmalex.ordermanagementsystem.service;
 
+import com.dmalex.ordermanagementsystem.domain.Dish;
+
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.List;
 
 public interface StatisticService {
-    Integer getCountOfOrdersForPeriod(LocalDateTime begin, LocalDateTime end);
+    Integer getAmountOfOrdersAtPeriod();
+
     BigDecimal getAverageGradeOfDish();
 
+    List<Dish> mostPopularDishes();
 }

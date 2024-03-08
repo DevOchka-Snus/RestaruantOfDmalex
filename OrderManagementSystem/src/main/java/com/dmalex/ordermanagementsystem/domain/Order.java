@@ -15,7 +15,7 @@ public class Order {
     private Long id;
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(inverseJoinColumns = @JoinColumn(name = "dish_amount_id"))
     private List<DishAmount> dishAmountList;
     private Long clientId;

@@ -1,4 +1,4 @@
-package com.dmalex.ordermanagementsystem.security;
+package com.dmalex.ordermanagementsystem.web.security;
 
 import com.dmalex.ordermanagementsystem.domain.Role;
 import com.dmalex.ordermanagementsystem.service.PersonService;
@@ -16,19 +16,16 @@ public class PersonTokenProvider {
     private final PersonService personService;
 
     public String createPersonToken(final String login, final String password, final Role role) {
-        return login + "_" + password + "_" + role;
+        return login + "probel" + password + "probel" + role;
     }
 
     public boolean isValidToken(final String token) {
-        String[] args = token.split("_");
-        if (args.length != 3 || !personService.isExists(args[0], args[1], Role.valueOf(args[2]))) {
-            return false;
-        }
-        return true;
+        String[] args = token.split("probel");
+        return args.length == 3 && personService.isExists(args[0], args[1], Role.valueOf(args[2]));
     }
 
     public Authentication getAuthentication(final String token) {
-        String login = token.split("_")[0];
+        String login = token.split("probel")[0];
         UserDetails userDetails = userDetailsService.loadUserByUsername(login);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }

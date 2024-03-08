@@ -10,8 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-
 @Service
 @RequiredArgsConstructor
 public class PersonServiceImpl implements PersonService {
@@ -21,6 +19,9 @@ public class PersonServiceImpl implements PersonService {
     @Transactional
     @Override
     public Person create(PersonDto personDto) {
+        if (personDto.getLogin().contains("probel") || personDto.getPassword().contains("probel")) {
+            throw new IllegalArgumentException("нельзя иметь \"probel\" в данных пользователя");
+        }
         if (personRepository.findByLogin(personDto.getLogin()).isPresent()) {
             throw new IllegalArgumentException("person already exists");
         }
@@ -31,8 +32,7 @@ public class PersonServiceImpl implements PersonService {
         person.setLogin(personDto.getLogin());
         person.setPassword(passwordEncoder.encode(personDto.getPassword()));
         person.setRole(personDto.getRole());
-        personRepository.save(person);
-        return person;
+        return personRepository.save(person);
     }
 
     @Override
@@ -41,13 +41,14 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public Person getById(Long id) {
+    public synchronized Person getById(Long id) {
         return personRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("user not found"));
     }
 
     @Override
     public boolean isExists(String login, String password, Role role) {
-        return personRepository.existsByLoginAndPasswordAndRole(login, passwordEncoder.encode(password), role);
+        return personRepository.existsByLoginAndPasswordAndRole(login, password, role);
+
     }
 
     @Override

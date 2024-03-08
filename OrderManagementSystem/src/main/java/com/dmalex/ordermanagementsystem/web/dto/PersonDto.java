@@ -1,7 +1,7 @@
 package com.dmalex.ordermanagementsystem.web.dto;
 
 import com.dmalex.ordermanagementsystem.domain.Role;
-import jakarta.persistence.Transient;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
@@ -15,5 +15,6 @@ public class PersonDto {
     private String password;
     @NotNull(message = "password confirmation must be not null")
     private String passwordConfirmation;
-    private transient Role role;
+    @Hidden
+    private Role role;
 }

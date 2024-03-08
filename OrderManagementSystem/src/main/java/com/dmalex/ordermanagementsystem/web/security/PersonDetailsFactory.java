@@ -1,4 +1,4 @@
-package com.dmalex.ordermanagementsystem.security;
+package com.dmalex.ordermanagementsystem.web.security;
 
 import com.dmalex.ordermanagementsystem.domain.Person;
 import com.dmalex.ordermanagementsystem.domain.Role;

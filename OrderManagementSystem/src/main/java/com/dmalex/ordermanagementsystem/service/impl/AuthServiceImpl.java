@@ -1,6 +1,6 @@
 package com.dmalex.ordermanagementsystem.service.impl;
 
-import com.dmalex.ordermanagementsystem.security.PersonTokenProvider;
+import com.dmalex.ordermanagementsystem.web.security.PersonTokenProvider;
 import com.dmalex.ordermanagementsystem.service.AuthService;
 import com.dmalex.ordermanagementsystem.service.PersonService;
 import com.dmalex.ordermanagementsystem.web.dto.AuthRequest;
@@ -21,8 +21,9 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(AuthRequest request) {
         var authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
         if (authentication == null) {
-            throw new IllegalStateException("huyna kakaya-to");
+            throw new IllegalStateException("login error");
         }
+        System.out.println(authentication.isAuthenticated());
         var person = personService.getByLogin(request.getLogin());
         AuthResponse response = new AuthResponse();
         response.setPersonToken(personTokenProvider.createPersonToken(person.getLogin(), person.getPassword(), person.getRole()));

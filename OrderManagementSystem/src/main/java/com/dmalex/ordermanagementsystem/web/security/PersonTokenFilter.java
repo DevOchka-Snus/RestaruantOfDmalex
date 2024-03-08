@@ -1,4 +1,4 @@
-package com.dmalex.ordermanagementsystem.security;
+package com.dmalex.ordermanagementsystem.web.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,7 +19,7 @@ public class PersonTokenFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String token = ((HttpServletRequest) request).getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer")) {
+        if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
         }
 
@@ -27,6 +27,9 @@ public class PersonTokenFilter extends GenericFilterBean {
             Authentication authentication = personTokenProvider.getAuthentication(token);
             if (authentication != null) {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                System.out.println("\n\nAuth\n\n");
+            } else {
+                throw new IllegalStateException("authentication is null");
             }
         }
 

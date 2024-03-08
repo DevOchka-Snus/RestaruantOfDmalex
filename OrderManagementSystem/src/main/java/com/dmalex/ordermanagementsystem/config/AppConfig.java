@@ -1,7 +1,7 @@
 package com.dmalex.ordermanagementsystem.config;
 
-import com.dmalex.ordermanagementsystem.security.PersonTokenFilter;
-import com.dmalex.ordermanagementsystem.security.PersonTokenProvider;
+import com.dmalex.ordermanagementsystem.web.security.PersonTokenFilter;
+import com.dmalex.ordermanagementsystem.web.security.PersonTokenProvider;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -11,9 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,8 +24,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Configuration
 @EnableWebSecurity
+@EnableAsync
 @RequiredArgsConstructor(onConstructor = @__(@Lazy))
 public class AppConfig {
     private final PersonTokenProvider personTokenProvider;
@@ -81,9 +84,10 @@ public class AppConfig {
                                         (request, response, authException) ->
                                         {
                                             response.setStatus(
-                                                            HttpStatus.UNAUTHORIZED.value()
-                                                    );
+                                                    HttpStatus.UNAUTHORIZED.value()
+                                            );
                                             response.getWriter().write("Unauthorized");
+
                                         })
                                 .accessDeniedHandler(
                                         ((request, response, accessDeniedException) -> {
@@ -92,10 +96,13 @@ public class AppConfig {
                                             );
                                             response.getWriter().write("Access denied");
                                         }
-                                )
+                                        )
                                 ))
                 .authorizeHttpRequests(configurer ->
-                        configurer.requestMatchers("/api/v1/auth/**")
+                        configurer
+                                .requestMatchers("/api/v1/dishes/admin/**")
+                                .hasRole("ADMIN")
+                                .requestMatchers("/api/v1/auth/**")
                                 .permitAll()
                                 .requestMatchers("/swagger-ui/**")
                                 .permitAll()
@@ -110,12 +117,48 @@ public class AppConfig {
         return http.build();
     }
 
-    @Bean(name = "onePriorityExecutor")
+    /*@Bean(name = "orderProcessExecutor")
     public AsyncTaskExecutor onePriorityExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setThreadNamePrefix("OnePriority-");
-        executor.setThreadPriority(1);
+        executor.setThreadNamePrefix("OrderProcess-");
+        executor.setThreadPriority(5);
         executor.initialize();
         return executor;
+    }*/
+
+    @Bean(name = "orderProcessExecutor")
+    public ExecutorService orderProcessExecutor() {
+        return Executors.newFixedThreadPool(
+                Runtime.getRuntime().availableProcessors(),
+                runnable -> {
+                    Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+                    thread.setPriority(5);
+                    return thread;
+                }
+        );
+    }
+
+    @Bean(name = "addDishAmountExecutor")
+    public ExecutorService addDishAmountExecutor() {
+        return Executors.newFixedThreadPool(
+                Runtime.getRuntime().availableProcessors(),
+                runnable -> {
+                    Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+                    thread.setPriority(6);
+                    return thread;
+                }
+        );
+    }
+
+    @Bean(name = "cancelOrderExecutor")
+    public ExecutorService cancelOrderExecutor() {
+        return Executors.newFixedThreadPool(
+                Runtime.getRuntime().availableProcessors(),
+                runnable -> {
+                    Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+                    thread.setPriority(7);
+                    return thread;
+                }
+        );
     }
 }

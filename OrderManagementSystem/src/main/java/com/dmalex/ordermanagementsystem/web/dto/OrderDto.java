@@ -11,6 +11,4 @@ import java.util.Map;
 public class OrderDto {
     @NotNull(message = "dishes must be not null")
     private Map<Long, Integer> dishes;
-    @NotNull(message = "client id must be not null")
-    private Long clientId;
 }

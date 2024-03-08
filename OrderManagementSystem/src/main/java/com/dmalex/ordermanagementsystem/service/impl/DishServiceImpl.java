@@ -10,9 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +22,7 @@ public class DishServiceImpl implements DishService {
     public Dish create(DishDto dto) {
         Dish dish = new Dish();
         dish.setName(dto.getName());
-        dish.setAmount(dish.getAmount());
+        dish.setAmount(dto.getAmount());
         dish.setPrice(dto.getPrice());
         dish.setTime(dto.getTime());
         dish.setIsInMenu(dto.getIsInMenu());
@@ -50,7 +48,7 @@ public class DishServiceImpl implements DishService {
 
     @Transactional
     @Override
-    public Dish updateMenuStatus(Long dishId, boolean menuStatus) {
+    public synchronized Dish updateMenuStatus(Long dishId, boolean menuStatus) {
         var dish = dishRepository.findById(dishId).orElseThrow(() -> new IllegalArgumentException("dish not found"));
         dish.setIsInMenu(menuStatus);
 
@@ -58,13 +56,13 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public Dish get(Long id) {
+    public synchronized Dish get(Long id) {
         return dishRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("dish not found"));
     }
 
     @Transactional
     @Override
-    public List<DishAmount> getDishOrders(final Map<Long, Integer> dtoMap) {
+    public synchronized List<DishAmount> getDishOrders(final Map<Long, Integer> dtoMap) {
         List<DishAmount> dishAmountList = new ArrayList<>();
         for (var dishOrder : dtoMap.entrySet()) {
             var dish = get(dishOrder.getKey());
@@ -81,7 +79,7 @@ public class DishServiceImpl implements DishService {
             dishRepository.save(dish);
 
             var dishAmount = new DishAmount();
-            dishAmount.setDishId(dishOrder.getKey());
+            dishAmount.setDish(dish);
             dishAmount.setAmount(dishOrder.getValue());
 
             dishAmountList.add(dishAmountRepository.save(dishAmount));
