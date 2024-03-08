@@ -9,8 +9,6 @@ import org.springframework.validation.annotation.Validated;
 @Data
 @Validated
 public class FeedbackDto {
-    @NotNull(message = "authorId must be not null")
-    private Long authorId;
     @NotNull(message = "grade must be not null")
     private Grade grade;
     @NotNull(message = "comment must be not null")
